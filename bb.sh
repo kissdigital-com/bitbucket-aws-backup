@@ -5,14 +5,12 @@
 #Bitbucket credentials
 bbuser=$1 # Bitbucket Username
 bbpass=$2 # Bitbucket Password
+bbworkspace=$3 # Bitbucket workspace (name or uuid in {uuid})
 
 #AWS S3 credentials
-AWS_ACCESS_KEY=$3
-AWS_SECRET=$4
-awsBucket=$5
-
-#bitbucket workspace (name or uuid in {uuid})
-bbworkspace=$6
+AWS_ACCESS_KEY=$4
+AWS_SECRET=$5
+awsBucket=$6
 
 #git clone mode: https or ssh
 mode=https
@@ -88,7 +86,7 @@ mkdir ./backups
 
 if [ -z "$5" ]
 then
-    echo "Usage: $0 bb_username bb_password aws_key aws_secret aws_bucket"
+    echo "Usage: $0 bb_username bb_password bb_workspace aws_key aws_secret aws_bucket"
 else
     bitbucket_get_urls
     bb_backup
