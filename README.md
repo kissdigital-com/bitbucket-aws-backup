@@ -11,7 +11,7 @@ The script backups all your bitbucket repositories to AWS S3 bucket.
 ## Usage
 
 ### CLI
-`./bb.sh bb_username bb_password aws_key aws_secret aws_bucket`
+`./bb.sh bb_username bb_password bb_workspace aws_key aws_secret aws_bucket`
 
 * `bb_username` is your bitbucket username, you can find it here: https://bitbucket.org/account/settings/
 * `bb_password` is your bitbucket app password, you can generate it here: https://bitbucket.org/account/settings/app-passwords/. The only permission required is "repositories:read"
