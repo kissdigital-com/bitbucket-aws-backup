@@ -21,7 +21,7 @@ bitbucket_get_urls () {
     rm -f backups/bitbucket.1
 
     for page in {1..4} ; do
-        curl --user $bbuser:$bbpass "https://api.bitbucket.org/2.0/repositories/"$bbworkspace"/?pagelen=100&page="$page >> backups/bitbucket.1
+        curl -s --user $bbuser:$bbpass "https://api.bitbucket.org/2.0/repositories/"$bbworkspace"/?pagelen=100&page="$page >> backups/bitbucket.1
     done
 
     tr , '\n' < backups/bitbucket.1 > backups/bitbucket.2
