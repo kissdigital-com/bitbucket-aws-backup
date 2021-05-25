@@ -5,11 +5,12 @@
 #Bitbucket credentials
 bbuser=$1 # Bitbucket Username
 bbpass=$2 # Bitbucket Password
+bbworkspace=$3 # Bitbucket workspace (name or uuid in {uuid})
 
 #AWS S3 credentials
-AWS_ACCESS_KEY=$3
-AWS_SECRET=$4
-awsBucket=$5
+AWS_ACCESS_KEY=$4
+AWS_SECRET=$5
+awsBucket=$6
 
 #git clone mode: https or ssh
 mode=https
@@ -20,7 +21,7 @@ bitbucket_get_urls () {
     rm -f backups/bitbucket.1
 
     for page in {1..4} ; do
-        curl --user $bbuser:$bbpass "https://api.bitbucket.org/2.0/repositories/kissdigitalcom/?pagelen=100&page="$page >> backups/bitbucket.1
+        curl -s --user $bbuser:$bbpass "https://api.bitbucket.org/2.0/repositories/"$bbworkspace"/?pagelen=100&page="$page >> backups/bitbucket.1
     done
 
     tr , '\n' < backups/bitbucket.1 > backups/bitbucket.2
@@ -52,6 +53,12 @@ bb_backup () {
     rm -rf `cat backups/VERSION`
     echo backups/$fname > backups/VERSION
     mkdir backups/$fname
+
+    #configure GIT_ASKPASS
+    printf "#!/bin/sh\n" > backups/git_askpass
+    printf "echo $bbpass\n" >> backups/git_askpass
+    chmod +x backups/git_askpass
+
     cd backups/$fname
 
     #clone
@@ -61,15 +68,17 @@ bb_backup () {
             repoFolder=$(echo $repo | cut -d"/" -f2)
         else
             repoFolder=$(echo $repo | cut -d"/" -f5)
-        fi    
-        
+        fi
+
         echo "========== Cloning $repo into $repoFolder =========="
-        git clone --mirror $repo $repoFolder
+        GIT_ASKPASS=../git_askpass git clone --mirror $repo $repoFolder
         AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY AWS_SECRET_ACCESS_KEY=$AWS_SECRET aws s3 sync ./$repoFolder s3://$awsBucket/$fname/$repoFolder/
         rm -fR ./$repoFolder
     done
 
+    cd ../..
     rm backups/VERSION
+    rm backups/git_askpass
 }
 
 #Backup Starts here
@@ -77,7 +86,7 @@ mkdir ./backups
 
 if [ -z "$5" ]
 then
-    echo "Usage: $0 bb_username bb_password aws_key aws_secret aws_bucket"
+    echo "Usage: $0 bb_username bb_password bb_workspace aws_key aws_secret aws_bucket"
 else
     bitbucket_get_urls
     bb_backup
